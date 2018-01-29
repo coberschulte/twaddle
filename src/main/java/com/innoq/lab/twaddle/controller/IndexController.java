@@ -1,18 +1,24 @@
 package com.innoq.lab.twaddle.controller;
 
+import com.innoq.lab.twaddle.model.User;
+import com.innoq.lab.twaddle.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.fromMappingName;
 
 @Controller
 public class IndexController {
+
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping(name = "index", value = "/twaddle")
     public String index(@RequestParam(value = "name", required = false, defaultValue = "World") String name, Model model) {
@@ -25,11 +31,36 @@ public class IndexController {
         return "user";
     }
 
+    @GetMapping(name = "user-detail", value = "/twaddle/user/{id}")
+    public String showUser(@PathVariable("id") Long id, Model model) {
+        User user = userRepository.findOne(id);
+
+        if (user != null) {
+            model.addAttribute("name", user.getUserName());
+        }
+        return "userDetails";
+    }
+
+    @GetMapping(name = "user-list", value = "/twaddle/user")
+    public String listUsers(Model model) {
+        Iterable<User> users = userRepository.findAll();
+
+        if (users.iterator().hasNext()) {
+            List<User> userList = new ArrayList<>();
+            users.iterator().forEachRemaining(userList::add);
+            model.addAttribute("users", userList);
+        }
+        return "userList";
+    }
+
     @PostMapping("/twaddle/user/create")
     public ModelAndView createUser(@ModelAttribute UserForm userForm) {
         System.out.println("Username: " + userForm.getUserName());
         System.out.println("Passwd:   " + userForm.getPasswd());
-        return new ModelAndView(new RedirectView(fromMappingName("index").arg(0, userForm.getUserName()).build()));
+
+        User user = userRepository.save(new User(userForm.getUserName(), userForm.getPasswd()));
+
+        return new ModelAndView(new RedirectView(fromMappingName("user-list").build()));
     }
 
     public static class UserForm {
