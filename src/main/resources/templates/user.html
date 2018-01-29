@@ -6,12 +6,17 @@
 </head>
 <body>
     <main>
+        <div>
+            <span th:text="${message}">Message</span>
+        </div>
         <fieldset>
             <form method="post" action="/twaddle/user/create">
                 <label for="userName">User name: </label>
                 <input type="text" name="userName" id="userName"></input>
                 <label for="passwd">Password: </label>
                 <input type="text" name="passwd" id="passwd"></input>
+                <label for="passwd">Repeat PW: </label>
+                <input type="text" name="passwd2" id="passwd2"></input>
                 <button type="submit">Absenden</button>
             </form>
         </fieldset>

@@ -2,11 +2,13 @@ package com.innoq.lab.twaddle.controller;
 
 import com.innoq.lab.twaddle.model.User;
 import com.innoq.lab.twaddle.repository.UserRepository;
+import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.ArrayList;
@@ -26,7 +28,7 @@ public class IndexController {
         return "index";
     }
 
-    @GetMapping("/twaddle/user/add")
+    @GetMapping(name = "user-form", value = "/twaddle/user/add")
     public String addUser() {
         return "user";
     }
@@ -54,18 +56,41 @@ public class IndexController {
     }
 
     @PostMapping("/twaddle/user/create")
-    public ModelAndView createUser(@ModelAttribute UserForm userForm) {
+    public ModelAndView createUser(@ModelAttribute UserForm userForm, RedirectAttributes redirectAttrs) {
         System.out.println("Username: " + userForm.getUserName());
         System.out.println("Passwd:   " + userForm.getPasswd());
 
-        User user = userRepository.save(new User(userForm.getUserName(), userForm.getPasswd()));
+        if ((userForm.getUserName() != null && !userForm.getUserName().isEmpty()) &&
+                (userForm.getPasswd() != null && userForm.getPasswd().isEmpty() && userForm.getPasswd().equals(userForm.getPasswd2()))) {
 
-        return new ModelAndView(new RedirectView(fromMappingName("user-list").build()));
+            User byUserName = userRepository.findByUserName(userForm.getUserName());
+            if (byUserName != null) {
+                return new ModelAndView(new RedirectView(fromMappingName("user-form").build()));
+            } else {
+                User user = userRepository.save(new User(userForm.getUserName(), userForm.getPasswd()));
+                return new ModelAndView(new RedirectView(fromMappingName("user-list").build()));
+            }
+        } else {
+            redirectAttrs.addFlashAttribute("message", "Something went wrong!");
+            return new ModelAndView(new RedirectView(fromMappingName("user-form").build()));
+        }
     }
 
     public static class UserForm {
+        @NotBlank
         private String userName;
+        @NotBlank
         private String passwd;
+        @NotBlank
+        private String passwd2;
+
+        public String getPasswd2() {
+            return passwd2;
+        }
+
+        public void setPasswd2(String passwd2) {
+            this.passwd2 = passwd2;
+        }
 
         public String getPasswd() {
             return passwd;
