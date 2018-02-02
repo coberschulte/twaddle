@@ -1,8 +1,8 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Getting Started: Serving Web Content</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Create User</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
           integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
@@ -15,17 +15,23 @@
     </script>
 </head>
 <body>
-<dl>
-    <label for="name">User name:</label>
-    <dt id="name" th:text="${user.userName}"></dt>
-    <img class="picture" th:src="@{'/twaddle/user/' + ${user.id} + '/avatar'}" />
-</dl>
+<main>
+    <div class="row">
+        <div>
+            <span th:text="${message}">Message</span>
+        </div>
 
-<div>
-    <a th:href="@{'/twaddle/user/' + ${user.id} + '/avatar/upload'}">Upload Avatar</a>
-    <a href="/twaddle">Home</a>
-</div>
+        <form method="post" action="/twaddle/user/create" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="userName">User name: </label>
+                <input type="text" name="userName" id="userName"></input>
+                <label for="passwd">Password: </label>
+                <input type="password" name="passwd" id="passwd"></input>
+                <button type="submit" class="btn btn-primary">Absenden</button>
+            </div>
+        </form>
+    </div>
 
-
+</main>
 </body>
 </html>
